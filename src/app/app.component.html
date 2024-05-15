@@ -1,5 +1,136 @@
-<div class="grid h-screen place-items-center">
-  <div class="font-bold text-3xl">
-    Fyle Internship Challenge
+<link rel="stylesheet" href="https://unpkg.com/flowbite@1.4.4/dist/flowbite.min.css" />
+
+<div class="row grid place-items-center m-4">
+  <div class="col-sm-12 col-md-12 col-lg-10">
+    <form  [formGroup]="userForm" (ngSubmit)="getData()">   
+      <label for="default-search" class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-gray-300">Search</label>
+      <div class="relative">
+          <div class="flex absolute inset-y-0 left-0 items-center pl-3 pointer-events-none">
+              <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          </div>
+          <input type="search" id="default-search" class="block py-3 pl-10 pr-10 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search Mockups, Logos..." required formControlName="username" [(ngModel)]="userName">
+
+          <div *ngIf="userName.invalid && (userName.dirty || userName.touched)">
+            <div *ngIf="userName.errors.required">
+              Username is required.
+            </div>
+          </div>
+          <button type="submit" class="custom-button" [disabled]="userForm.invalid">Search</button>
+      </div>
+    </form>
   </div>
 </div>
+
+<section *ngIf="showCard">
+  <div class="row grid place-items-center m-4" *ngIf="!blnLoader">
+    <div class="col-sm-12 col-md-12 col-lg-10 mb-3">
+      <div class="card">
+        <div class="row p-4">
+          <div class="col-lg-3 col-md-4 col-sm-12 grid place-items-center mt-2">
+            <img class="image-box" src="{{userDetails.avatar_url}}" alt="">
+          </div>
+          <div class="col-lg-9 col-md-8 col-sm-12 grid" style="align-items: center;">
+            <div class="font-800 text-3xl">
+              {{userDetails.name}}
+            </div>
+            <ngx-skeleton-loader [theme]="{height: '2.25rem'}" *ngIf="blnLoader"></ngx-skeleton-loader>
+            <p *ngIf="userDetails.bio">{{userDetails.bio}}</p>
+            <ngx-skeleton-loader *ngIf="blnLoader"></ngx-skeleton-loader>
+            <p *ngIf="userDetails.location">{{userDetails.location}}</p>
+            <ngx-skeleton-loader *ngIf="blnLoader"></ngx-skeleton-loader>
+            <p *ngIf="userDetails.twitter_username">Twitter: {{userDetails.twitter_username}}</p>
+            <a href="https://api.github.com/repos/Vaishak0808/School-management-system/languages"></a>
+            <ngx-skeleton-loader *ngIf="blnLoader"></ngx-skeleton-loader>
+          </div>
+          <div class="col-12 mt-2">
+            <i class="bi bi-link-45deg"></i>
+            <p>{{userDetails.html_url}}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-12 col-md-12 col-lg-10 mb-3">
+      <div class="card p-4">
+        <div class="row mb-3">
+          <div class="col-lg-6 col-md-6 col-sm-12 mt-2" *ngFor="let details of getPaginatedRepos()">
+            <div class="card p-4" style="height: 150px;">
+              <div class="font-800 text-3xl">
+                {{details.name}}
+              </div>
+              <p>{{details.description}}</p>
+              <ul>
+                <li *ngFor="let lang in details.json_lang | keyvalue">
+                  <span class="badge badge-primary">{{lang}}</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="row grid place-items-center">
+          <nav aria-label="Page navigation example mt-4">
+            <ul class="pagination">
+              <li class="page-item" [class.disabled]="currentPage === 1">
+                <a class="page-link" href="#" aria-label="Previous" (click)="onPageChange(currentPage - 1)">
+                  <span aria-hidden="true">&laquo;</span>
+                </a>
+              </li>
+              <li class="page-item" *ngFor="let page of totalPagesArray" [class.active]="page === currentPage">
+                <a class="page-link" href="#" (click)="onPageChange(page)">{{ page }}</a>
+              </li>
+              <li class="page-item" [class.disabled]="currentPage === totalPages">
+                <a class="page-link" href="#" aria-label="Next" (click)="onPageChange(currentPage + 1)">
+                  <span aria-hidden="true">&raquo;</span>
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="row grid place-items-center m-4" *ngIf="blnLoader">
+    <div class="col-sm-12 col-md-12 col-lg-10 mb-3">
+      <div class="card">
+        <div class="row p-4">
+          <div class="col-lg-3 col-md-4 col-sm-12 grid place-items-center mt-2">
+            <ngx-skeleton-loader
+              count="1"
+              [theme]="{ 
+                height: '190px',
+                width: '190px'
+              }"
+              appearance="circle">
+            </ngx-skeleton-loader>
+          </div>
+          <div class="col-lg-9 col-md-8 col-sm-12 grid" style="align-items: center;">
+            <ngx-skeleton-loader [theme]="{height: '2.25rem'}"></ngx-skeleton-loader>
+            <ngx-skeleton-loader></ngx-skeleton-loader>
+            <ngx-skeleton-loader></ngx-skeleton-loader>
+            <ngx-skeleton-loader></ngx-skeleton-loader>
+          </div>
+          <div class="col-12 mt-2">
+            <ngx-skeleton-loader></ngx-skeleton-loader>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-12 col-md-12 col-lg-10 mb-3">
+      <div class="card p-4">
+        <div class="row mb-3">
+          <ng-container *ngFor="let _ of [].constructor(10); let i = index">
+            <div class="col-lg-6 col-md-6 col-sm-12 mt-2">
+              
+                <div class="card p-4" style="height: 150px;">
+                  <ngx-skeleton-loader [theme]="{height: '2.25rem'}"></ngx-skeleton-loader>
+                  <ngx-skeleton-loader></ngx-skeleton-loader>
+                  <ngx-skeleton-loader></ngx-skeleton-loader>
+                </div>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+</section>
